@@ -48,10 +48,12 @@ npm install
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values:
-
-```bash
-cp .env.example .env
+create an .env file with:
+```env
+API_USER=example@api.com
+API_KEY=glassix API key
+API_SECRET=Glassix API password
+BASE_URL=https://{workspce}.glassix.com/api/v1.2/
 ```
 
 ```env
