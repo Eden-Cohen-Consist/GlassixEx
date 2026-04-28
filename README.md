@@ -49,17 +49,12 @@ npm install
 ### Environment Variables
 
 create an .env file with:
+
 ```env
 API_USER=example@api.com
 API_KEY=glassix API key
 API_SECRET=Glassix API password
 BASE_URL=https://{workspce}.glassix.com/api/v1.2/
-```
-
-```env
-GLASSIX_API_URL=https://api.glassix.com
-API_KEY=your_api_key_here
-PORT=3000
 ```
 
 > ⚠️ Never commit your `.env` file.
@@ -81,12 +76,12 @@ npm start
 
 ### Auth
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-|   GET  | `/auth/login` | Login to Glassix and receive a token |
-
+| Method | Endpoint      | Description                          |
+| ------ | ------------- | ------------------------------------ |
+| GET    | `/auth/login` | Login to Glassix and receive a token |
 
 **Response:**
+
 ```json
 {
   "access_token": "...",
@@ -101,11 +96,11 @@ npm start
 
 > All ticket endpoints require an `Authorization: Bearer <token>` header.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `tickets/create` | Create a new ticket |
-| POST | `/tickets/hello` | Send a message to a ticket |
-| PUT  | `/tickets/close` | Update a ticket's state to close|
+| Method | Endpoint         | Description                      |
+| ------ | ---------------- | -------------------------------- |
+| POST   | `tickets/create` | Create a new ticket              |
+| POST   | `/tickets/hello` | Send a message to a ticket       |
+| PUT    | `/tickets/close` | Update a ticket's state to close |
 
 ---
 
