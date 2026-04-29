@@ -1,12 +1,22 @@
 import {Request, Response} from "express";
 import {Ticket} from "../models/ticket";
 
-const GLASSIX_URL = process.env.BASE_URL!;
-const API_KEY = process.env.API_KEY!;
-const API_SECRET = process.env.API_SECRET!;
-const API_USER = process.env.API_USER!;
+// ISSUE: `Request`/`Response` imports are unused in this service layer.
+// Indicates layer mixing or leftover code. (GPT vibe coded code.)
+const GLASSIX_URL = process.env.BASE_URL!; //ISSUE: dear nodejs, this parameter exists I swear! (but who said so? how do I know if it exists?)
+const API_KEY = process.env.API_KEY!; //ISSUE: dear nodejs, this parameter exists I swear! (but who said so? how do I know if it exists?)
+const API_SECRET = process.env.API_SECRET!; //ISSUE: dear nodejs, this parameter exists I swear! (but who said so? how do I know if it exists?)
+const API_USER = process.env.API_USER!; //ISSUE: dear nodejs, this parameter exists I swear! (but who said so? how do I know if it exists?)
+// ISSUE: Non-null assertions (`!`) hide missing env config until runtime failures, assume we run this and suddenly oops, the parameter doesn't exist in the env file, why would we want to find it out at runtime?
+// Prefer explicit startup-time validation with clear process exit.
 
 export const getAuthToken= async() => {
+  // ISSUE: No timeout/retry for outbound auth call.
+  // ISSUE: No rate limiting for outbound auth call.
+  // ISSUE: No error handling for outbound auth call.
+  // ISSUE: No logging for outbound auth call.
+  // ISSUE: No tracing for outbound auth call.
+
   const response = await fetch(GLASSIX_URL + "token/get", {
     method: "POST",
     headers:{
@@ -50,6 +60,7 @@ export const sendHello = async(ticketId: number, token: string) =>{
   const options = {
     method: 'POST',
     headers: {'content-type': 'application/json', "Authorization": token},
+    // ISSUE: Message text is hardcoded in service code, not driven by validated input/config.
     body: JSON.stringify({"enableFreeTextInput": false, "text": "hello Malshin"})
   }
 
