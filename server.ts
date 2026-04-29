@@ -8,7 +8,7 @@ import tickets from "./routes/tickets"
 
 const app = express();
 
-// ISSUE: No centralized security middleware (e.g. rate limiting, security headers, etc.).
+// ISSUE: No centralized security middleware (exampl rate limiting, security headers, etc.)
 // This leaves defaults open and makes abuse protection harder.
 app.use(express.json());
 
