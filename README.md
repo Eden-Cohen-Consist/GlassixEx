@@ -13,15 +13,23 @@ Glassix-Exam/
 ├── tsconfig.json
 ├── .env.example
 ├── controllers/
-│   ├── authController.ts
 │   └── ticketController.ts
+├── middleware/
+│   └── authMiddleware.ts
+│   └── errorMiddleware.ts
+│   └── rateLimitMiddleware.ts
 ├── services/
 │   └── glassixService.ts
+│   └── axiosConfig.ts
+│   └── getToken.ts
+├── utils/
+│   └── envConf.ts
 ├── routes/
-│   ├── auth.ts
+│   ├── health.ts
 │   └── tickets.ts
 ├── models/
 │   └── ticket.ts
+│   └── request.ts
 └── screenshots/
     ├── auth-response.png
     ├── create-ticket-response.png
@@ -74,33 +82,21 @@ npm start
 
 ## API Endpoints
 
-### Auth
-
-| Method | Endpoint      | Description                          |
-| ------ | ------------- | ------------------------------------ |
-| GET    | `/auth/login` | Login to Glassix and receive a token |
-
-**Response:**
-
-```json
-{
-  "access_token": "...",
-  "token_type": "...",
-  "expires_in": "..."
-}
-```
-
----
-
 ### Tickets
 
 > All ticket endpoints require an `Authorization: Bearer <token>` header.
 
-| Method | Endpoint         | Description                      |
-| ------ | ---------------- | -------------------------------- |
-| POST   | `tickets/create` | Create a new ticket              |
-| POST   | `/tickets/hello` | Send a message to a ticket       |
-| PUT    | `/tickets/close` | Update a ticket's state to close |
+| Method | Endpoint                     | Description                                                    |
+| ------ | ---------------------------- | -------------------------------------------------------------- |
+| POST   | `tickets/create`             | Create a new ticket                                            |
+| POST   | `/tickets/message/:ticketId` | Send a message to a ticket body example: {text: "hello world"} |
+| PUT    | `/tickets/state/:ticketId`   | Update a ticket's state body example: {nextState: "Closed"}    |
+
+### Health Check
+
+```
+GET /health → { "status": "ok" }
+```
 
 ---
 
@@ -111,9 +107,3 @@ npm start
 - **Routes** — wire endpoints to controllers
 
 ---
-
-## Health Check
-
-```
-GET /health → { "status": "ok" }
-```
