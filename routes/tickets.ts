@@ -1,12 +1,10 @@
-import {Router} from "express";
-import {create, hello, close} from "../controllers/ticketController";
+import { Router } from "express";
+import { create, sendMessage, setState } from "../controllers/ticketController";
 
 const router = Router();
 
-// ISSUE (security): No auth middleware or per-route authorization checks before ticket operations.
 router.post("/create", create);
-router.post("/hello", hello);
-router.put("/close", close);
+router.post("/message/:ticketId", sendMessage);
+router.put("/state/:ticketId", setState);
 
 export default router;
-

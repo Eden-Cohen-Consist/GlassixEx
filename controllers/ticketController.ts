@@ -1,92 +1,100 @@
-import {Request, Response} from "express";
-import {Ticket} from "../models/ticket";
-import {createTicket, sendHello, closeTicket} from "../services/glassixService";
+import { Request, Response } from "express";
+import { ticketState } from "../models/ticket";
+import { glassixService } from "../services/glassixService";
+import { CreateTicketReq } from "../models/request";
 
-export const create = async(req: Request, res: Response): Promise<void> =>{
-  // ISSUE: Raw Authorization header is passed through without format validation (e.g. Bearer scheme).
-  // ISSUE: use a validation middleware to validate any input coming from the client.
-  const token = req.headers.authorization;
+export const create = async (req: Request, res: Response) => {
+  const payload = req?.body as CreateTicketReq;
 
-  // ISSUE: Business payload is hardcoded in controller.
-  // This hardcodes the identifier email in source code.
-  const ticketDemo: Ticket = {
-    culture: 'en-US',
-    state: 'Open',
-    getAvailableUser: true,
-    addIntroductionMessage: true,
-    enableWebhook: true,
-    markAsRead: false,
-    participants: [
-      {
-        type: 'Client',
-        protocolType: 'Mail',
-        isActive: true,
-        isDeleted: false,
-        subProtocolType: 'MailTo',
-        identifier: 'gurl@consist.co.il'
-      }
-    ]
-  }
-
-  if(!token){
-    res.status(401).json({error: "No token provided"});
-
-    return;
-  }
-
-  try{
-    const data = await createTicket(ticketDemo, token);
+  try {
+    const data = await glassixService.createTicket(payload);
+    if (data.isAxiosError) {
+      return res.status(data.status).json({ isOk: false, message: data.code });
+    }
     res.status(201).json(data);
+  } catch (err: any) {
+    console.error("unexpected error: ", err);
+    return res
+      .status(500)
+      .json({ isOk: false, message: "Internal server Error" });
   }
-  catch(err: any){
-    // ISSUE: Returning `err.message` can leak internal/upstream details to clients, client errors should always be sanitized before being returned to the client.
-    res.status(500).json({error: err.message});
-  }
-}
+};
 
+export const sendMessage = async (req: Request, res: Response) => {
+  const ticketId =
+    typeof req.params?.ticketId === "string" ? req.params.ticketId : null;
 
-export const hello = async(req: Request, res: Response): Promise<void> =>{
-  // ISSUE: same issue as in create ticket. (validation middleware)
-  const token = req.headers.authorization;
-  const ticketId = req.body.ticketId;
-
-
-  if(!token){
-    res.status(401).json({error: "No token provided"});
-
-    return;
-  }
-
-  try{
-    const data = await sendHello(ticketId ,token);
-
-    res.status(201).json(data);
-  }
-  catch(err: any){
-    //ISSUE: same issue as in create ticket. (error not sanitized)
-    res.status(500).json({error: err.message});
+  // console.log(ticketId);
+  if (!ticketId || ticketId === "") {
+    return res
+      .status(400)
+      .json({ isOk: false, message: "Bad Request: no ticket id provided" });
   }
 
-}
+  const text = req.body?.text;
 
-//ISSUE: same issues as in "hello" function.
-export const close = async(req: Request, res: Response): Promise<void> => {
-  const token = req.headers.authorization;
-
-  const ticketId = req.body.ticketId;
-
-  if(!token){
-    res.status(401).json({error: "No token provided"});
-
-    return;
+  if (!req.body?.text) {
+    return res
+      .status(400)
+      .json({ isOk: false, message: "Bad Request: no message to send" });
   }
-
-  try{
-    const data = await closeTicket(ticketId ,token);
-
-    res.status(201).json(data);
+  try {
+    const response = await glassixService.sendMessage(parseInt(ticketId), {
+      text: text,
+    });
+    if (response.isAxiosError) {
+      console.error(`Error ${response.status} ${response.code}`);
+      return res
+        .status(response.status)
+        .json({ isOk: false, message: `${response.code}` });
+    }
+    res.status(200).json({ isOk: true, message: "Message sent to chat" });
+  } catch (error: any) {
+    console.error("unexpected error: ", error);
+    return res
+      .status(500)
+      .json({ isOk: false, message: "Internal server Error" });
   }
-  catch(err: any){
-    res.status(500).json({error: err.message});
+};
+
+export const setState = async (req: Request, res: Response) => {
+  const ticketId =
+    typeof req.params?.ticketId === "string" ? req.params.ticketId : null;
+
+  if (!ticketId || ticketId === "") {
+    return res
+      .status(400)
+      .json({ isOk: false, message: "Bad Request: no ticket id provided" });
   }
-}
+  const nextState = req.body?.nextState;
+  console.log(nextState);
+
+  if (!Object.values(ticketState).includes(nextState as ticketState)) {
+    console.log(`Error with ticket state : ${ticketState}`);
+    return res
+      .status(400)
+      .json({ isOk: false, message: `Bad request unknown ticket state` });
+  }
+  try {
+    const response = await glassixService.setState(
+      parseInt(ticketId),
+      nextState,
+    );
+
+    if (response.isAxiosError) {
+      console.error(response);
+      console.error(`Error ${response.status} ${response.code}`);
+      return res
+        .status(response.status)
+        .json({ isOk: false, message: `${response.code}` });
+    }
+    return res
+      .status(200)
+      .json({ isOk: true, message: `Closed ticket id: ${ticketId}` });
+  } catch (error: any) {
+    console.error("unexpected error: ", error);
+    return res
+      .status(500)
+      .json({ isOk: false, message: "Internal server Error" });
+  }
+};
